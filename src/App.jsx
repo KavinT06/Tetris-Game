@@ -1,9 +1,14 @@
-import React from 'react';
+import React  from 'react';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faTrophy, faGem } from '@fortawesome/free-solid-svg-icons';
 import Grid from './cmp/grid';
+import { useState } from 'react';
 
 export default function App() {
+
+  const [score, setScore] = useState(0);
+
+
   return (
     <>
       <div className='head'>
@@ -12,7 +17,7 @@ export default function App() {
           <div className='sco'>
             <p>Score</p>
 
-            <div className='hscore'><p>🏆 Highest Score : 10245</p></div>
+            <div className='hscore'><p>🏆 Highest Score : {score}</p></div>
             <div className='hscore'><p>💎 Your Score : 10245</p></div>
 
             <div className="upcome">
@@ -31,7 +36,7 @@ export default function App() {
           </div>
 
           <div>
-            <Grid />
+            <Grid onScore={(points) => setScore(prev => prev + points)} />
           </div>
 
         </div>
