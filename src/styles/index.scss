@@ -1,0 +1,146 @@
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+.head {
+    height: 100vh;
+    color: white;
+    text-align: center;
+}
+
+html {
+    font-family: 'Poppins', Tahoma, Geneva, Verdana, sans-serif;
+}
+
+body {
+    background-color: #1e1e2e;
+}
+
+.bgrid {
+    display: grid;
+    grid-template-columns: 1fr 2fr;
+    gap: 20px;
+}
+
+.bflex {
+    display: flex;
+    justify-content: space-around;
+}
+
+.bmain {
+    height: 50px;
+}
+
+.hscore {
+    width: max-content;
+    padding: 20px 25px;
+    background-color: #61616c;
+    border-radius: 40px;
+    gap: 10px;
+    color: black;
+}
+
+.hscore p {
+    font-size: 20px;
+    font-weight: 600;
+    color: white;
+}
+
+.igem {
+    color: #B9F2FF;
+}
+
+.itrophy {
+    color: gold;
+}
+
+.sco {
+    width: 100%;
+    display: flex;
+    flex-direction: column;
+    gap: 15px;
+    justify-content: center;
+    align-items: center;
+
+}
+
+.sco>p {
+    font-size: 24px;
+    font-weight: 700;
+}
+
+
+.grid {
+    display: grid;
+    margin-top: 25px;
+    grid-template-columns: repeat(2, 85px);
+    grid-template-rows: repeat(2, 85px);
+}
+
+.box {
+    width: 80px;
+    height: 80px;
+    border-radius: 20px;
+    background: #d76488;
+    box-shadow: 0px 6px 10px rgba(0, 0, 0, 0.4);
+}
+
+.ebox {
+    width: 80px;
+    height: 80px;
+    border-radius: 20px;
+    background: #61616c;
+    box-shadow: 0px 6px 10px rgba(0, 0, 0, 0.4);
+}
+
+.egrid {
+    display: grid;
+    margin-top: 25px;
+    grid-template-columns: repeat(8, 85px);
+    grid-template-rows: repeat(8, 85px);
+    gap: 5px;
+}
+
+
+.bottom {
+    grid-column: 2;
+    grid-row: 2;
+}
+
+.upcome {
+    margin-top: 50px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: flex-start;
+    padding: 15px;
+    width: 40%;
+    background-color: #61616c;
+    font-weight: 600;
+}
+
+.up-grid-wrapper {
+    width: 200px;
+    height: 200px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+.grid4 {
+    display: grid;
+    grid-template-columns: repeat(4, 40px);
+    grid-template-rows: repeat(4, 40px);
+    gap: 5px;
+}
+
+.box {
+    width: 40px;
+    height: 40px;
+    background: linear-gradient(to bottom, #ff77b0, #d76488);
+    border-radius: 8px;
+    box-shadow: 0px 4px 8px rgba(0, 0, 0, 0.4);
+}
+
