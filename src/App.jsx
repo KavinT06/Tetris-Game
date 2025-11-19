@@ -1,4 +1,4 @@
-import React  from 'react';
+import React from 'react';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faTrophy, faGem } from '@fortawesome/free-solid-svg-icons';
 import Grid from './cmp/grid';
@@ -36,7 +36,7 @@ export default function App() {
           </div>
 
           <div>
-            <Grid onScore={(points) => setScore(prev => prev + points)} />
+            <Grid onScore={setScore} />
           </div>
 
         </div>

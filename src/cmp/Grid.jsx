@@ -56,6 +56,16 @@ export default function Grid({ onScore }) {
                     setPosition(nextPos);
                 }
             }
+
+            if (e.key === "ArrowUp") {
+                const rotated = rotatePiece(currentPiece);
+                const nextPos = { row: position.row, col: position.col };
+
+                if (!checkCollision(rotated, nextPos, board)) {
+                    setCurrentPiece(rotated);
+                }
+            }
+
         }
 
         window.addEventListener("keydown", handleKeyDown);
@@ -186,6 +196,20 @@ export default function Grid({ onScore }) {
     };
 
     const renderedBoard = getRenderedBoard();
+
+    function rotateMatrix(matrix) {
+        return matrix[0].map((_, i) => matrix.map(row => row[i]).reverse());
+    }
+
+    function rotatePiece(piece) {
+        return {
+            ...piece,
+            rotation: (piece.rotation + 1) % piece.shape.length
+        };
+    }
+
+
+
 
     return (
         <div className="egrid">
