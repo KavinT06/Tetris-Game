@@ -220,13 +220,6 @@ export default function Grid({ onScore }) {
         lockPiece();
     }
 
-
-
-
-
-
-
-
     return (
         <div className="egrid">
             {renderedBoard.map((row, rowIndex) =>
