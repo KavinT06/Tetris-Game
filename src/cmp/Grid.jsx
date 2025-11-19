@@ -11,13 +11,27 @@ export default function Grid({ onScore }) {
     const [currentPiece, setCurrentPiece] = useState(null);
     const [position, setPosition] = useState({ row: 0, col: 3 });
 
-    React.useEffect(() => {
-        const interval = setInterval(() => {
-            console.log("tick");
-        }, 800);
+    const createEmptyBoard = () => {
+        return Array.from({ length: 20 }, () =>
+            Array(10).fill(0)
+        );
+    };
 
+
+    useEffect(() => {
+        if (!currentPiece) return;
+        const interval = setInterval(() => {
+            const nextPos = { row: position.row + 1, col: position.col };
+            if (checkCollision(currentPiece, nextPos, board)) {
+                lockPiece();
+                return;
+            }
+            setPosition(nextPos);
+        }, 1000);
         return () => clearInterval(interval);
-    }, []);
+    }, [currentPiece, position, board]);
+
+
 
 
     useEffect(() => {
@@ -143,15 +157,19 @@ export default function Grid({ onScore }) {
 
     return (
         <div className="egrid">
-            {renderedBoard.flat().map((cell, i) => (
-                <div
-                    key={i}
-                    className="ebox"
-                    style={{
-                        background: cell === 0 ? "#61616c" : cell === 1 ? "#bb5e7e" : "#ff77b0"
-                    }}
-                ></div>
-            ))}
+            {renderedBoard.map((row, rowIndex) =>
+                row.map((cell, colIndex) => (
+                    <div
+                        key={`${rowIndex}-${colIndex}`}
+                        className="ebox"
+                        style={{
+                            backgroundColor: cell === 0 ? "#61616c" : cell === 1 ? "#ff77b0" : "#d76488"
+                        }}
+                    ></div>
+                ))
+            )}
+
         </div>
+
     );
 }
