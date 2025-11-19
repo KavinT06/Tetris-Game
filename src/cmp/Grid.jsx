@@ -32,6 +32,38 @@ export default function Grid({ onScore }) {
     }, [currentPiece, position, board]);
 
 
+    useEffect(() => {
+        function handleKeyDown(e) {
+            if (!currentPiece) return;
+
+            if (e.key === "ArrowLeft") {
+                const nextPos = { row: position.row, col: position.col - 1 };
+                if (!checkCollision(currentPiece, nextPos, board)) {
+                    setPosition(nextPos);
+                }
+            }
+
+            if (e.key === "ArrowRight") {
+                const nextPos = { row: position.row, col: position.col + 1 };
+                if (!checkCollision(currentPiece, nextPos, board)) {
+                    setPosition(nextPos);
+                }
+            }
+
+            if (e.key === "ArrowDown") {
+                const nextPos = { row: position.row + 1, col: position.col };
+                if (!checkCollision(currentPiece, nextPos, board)) {
+                    setPosition(nextPos);
+                }
+            }
+        }
+
+        window.addEventListener("keydown", handleKeyDown);
+
+        return () => window.removeEventListener("keydown", handleKeyDown);
+    }, [currentPiece, position, board]);
+
+
 
 
     useEffect(() => {
