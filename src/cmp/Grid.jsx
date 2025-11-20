@@ -312,6 +312,7 @@ export default function Grid({ onScore, onNextPiece }) {
             {isGameOver && (
                 <div style={{
                     position: 'absolute',
+                    height: '90vh',
                     inset: 0,
                     background: "rgba(0,0,0,0.65)",
                     display: "flex",
