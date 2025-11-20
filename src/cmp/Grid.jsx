@@ -106,45 +106,47 @@ export default function Grid({ onScore, onNextPiece }) {
         return { board: [...empty, ...updated], rows: fullRows.length };
     };
 
-const spawnNextPiece = () => {
-    const nextPiece = randomTetromino();
+    const spawnNextPiece = () => {
+        const nextPiece = randomTetromino();
 
-    if (onNextPiece) {
-        onNextPiece(nextPiece);
-    }
+        if (onNextPiece) {
+            onNextPiece(nextPiece);
+        }
 
-    const matrix = nextPiece.shape[nextPiece.rotation];
-    const colStart = Math.floor((COLS - matrix[0].length) / 2);
-    const startPos = { row: 0, col: colStart };
+        const matrix = nextPiece.shape[nextPiece.rotation];
+        const colStart = Math.floor((COLS - matrix[0].length) / 2);
+        const startPos = { row: 0, col: colStart };
 
-    if (checkCollision(nextPiece, startPos, board)) {
-        setIsGameOver(true);
-        return;
-    }
+        if (checkCollision(nextPiece, startPos, board)) {
+            setIsGameOver(true);
+            return;
+        }
 
-    setCurrentPiece(nextPiece);
-    setPosition(startPos);
-};
+        setCurrentPiece(nextPiece);
+        setPosition(startPos);
+    };
 
 
 
     const lockPiece = (posOverride) => {
         const posToUse = posOverride || position;
 
+        // Game Over if piece locks at top
         if (posToUse.row <= 0) {
             setIsGameOver(true);
             return;
         }
 
+        // Copy board
         const newBoard = board.map(row => [...row]);
         const matrix = currentPiece.shape[currentPiece.rotation];
 
+        // Lock current piece into board
         for (let r = 0; r < matrix.length; r++) {
             for (let c = 0; c < matrix[r].length; c++) {
                 if (matrix[r][c]) {
                     const nr = posToUse.row + r;
                     const nc = posToUse.col + c;
-
                     if (nr >= 0 && nr < ROWS && nc >= 0 && nc < COLS) {
                         newBoard[nr][nc] = 1;
                     }
@@ -152,16 +154,29 @@ const spawnNextPiece = () => {
             }
         }
 
+        // Clear full rows
         const { board: clearedBoard, rows } = clearRows(newBoard);
         setBoard(clearedBoard);
 
-        if (rows === 1) { setScore(s => s + 100); onScore?.(s => s + 100); }
-        if (rows === 2) { setScore(s => s + 300); onScore?.(s => s + 300); }
-        if (rows === 3) { setScore(s => s + 600); onScore?.(s => s + 600); }
-        if (rows === 4) { setScore(s => s + 1000); onScore?.(s => s + 1000); }
+        // Update score correctly
+        if (rows > 0) {
+            setScore(prev => {
+                let points = 0;
+                if (rows === 1) points = 100;
+                if (rows === 2) points = 300;
+                if (rows === 3) points = 600;
+                if (rows === 4) points = 1000;
 
+                const newScore = prev + points;
+                onScore?.(newScore); // send actual score to App.jsx
+                return newScore;
+            });
+        }
+
+        // Spawn next piece
         spawnNextPiece();
     };
+
 
     // AUTO FALLING
     useEffect(() => {
