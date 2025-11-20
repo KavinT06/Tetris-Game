@@ -1,12 +1,12 @@
 import React from 'react';
-import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-import { faTrophy, faGem } from '@fortawesome/free-solid-svg-icons';
 import Grid from './cmp/Grid';
+import Upcoming from './cmp/Upcoming';
 import { useState } from 'react';
 
 export default function App() {
 
   const [score, setScore] = useState(0);
+  const [nextPiece, setNextPiece] = useState(null);
 
 
   return (
@@ -24,19 +24,17 @@ export default function App() {
               <p>UPCOMING</p>
 
               <div className="up-grid-wrapper">
-                <div className="grid4">
-                  {Array.from({ length: 16 }).map((_, i) => (
-                    <div key={i} className="box"></div>
-                  ))}
-                </div>
+                <Upcoming nextPiece={nextPiece} />
               </div>
 
+
             </div>
+
 
           </div>
 
           <div>
-            <Grid onScore={setScore} />
+            <Grid onScore={setScore} onNextPiece={setNextPiece} />
           </div>
 
         </div>

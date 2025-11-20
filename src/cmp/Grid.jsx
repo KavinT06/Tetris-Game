@@ -4,7 +4,7 @@ import { randomTetromino } from '../tetrominoes';
 const ROWS = 18;
 const COLS = 10;
 
-export default function Grid({ onScore }) {
+export default function Grid({ onScore, onNextPiece }) {
     const [board, setBoard] = useState(
         Array.from({ length: ROWS }, () => Array(COLS).fill(0))
     );
@@ -106,27 +106,31 @@ export default function Grid({ onScore }) {
         return { board: [...empty, ...updated], rows: fullRows.length };
     };
 
-    // SPAWN NEW PIECE
-    const spawnNextPiece = () => {
-        const p = randomTetromino();
-        const matrix = p.shape[p.rotation];
-        const colStart = Math.floor((COLS - matrix[0].length) / 2);
-        const startPos = { row: 0, col: colStart };
+const spawnNextPiece = () => {
+    const nextPiece = randomTetromino();
 
-        if (checkCollision(p, startPos, board)) {
-            setIsGameOver(true);
-            return;
-        }
+    if (onNextPiece) {
+        onNextPiece(nextPiece);
+    }
 
-        setCurrentPiece(p);
-        setPosition(startPos);
-    };
+    const matrix = nextPiece.shape[nextPiece.rotation];
+    const colStart = Math.floor((COLS - matrix[0].length) / 2);
+    const startPos = { row: 0, col: colStart };
 
-    // LOCK PIECE (UPDATED FOR GAME OVER)
+    if (checkCollision(nextPiece, startPos, board)) {
+        setIsGameOver(true);
+        return;
+    }
+
+    setCurrentPiece(nextPiece);
+    setPosition(startPos);
+};
+
+
+
     const lockPiece = (posOverride) => {
         const posToUse = posOverride || position;
 
-        // GAME OVER CHECK — piece locked at top row
         if (posToUse.row <= 0) {
             setIsGameOver(true);
             return;
@@ -177,7 +181,6 @@ export default function Grid({ onScore }) {
         return () => clearInterval(interval);
     }, [currentPiece, position, board, isGameOver]);
 
-    // HARD DROP (UPDATED)
     function hardDrop() {
         if (isGameOver) return;
         if (!currentPiece) return;
