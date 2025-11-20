@@ -1,7 +1,7 @@
 import React from 'react';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faTrophy, faGem } from '@fortawesome/free-solid-svg-icons';
-import Grid from './cmp/grid';
+import Grid from './cmp/Grid';
 import { useState } from 'react';
 
 export default function App() {

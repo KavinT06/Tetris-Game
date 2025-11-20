@@ -18,21 +18,6 @@ export default function Grid({ onScore }) {
     };
 
 
-
-    useEffect(() => {
-        if (!currentPiece) return;
-        const interval = setInterval(() => {
-            const nextPos = { row: position.row + 1, col: position.col };
-            if (checkCollision(currentPiece, nextPos, board)) {
-                lockPiece();
-                return;
-            }
-            setPosition(nextPos);
-        }, 1000);
-        return () => clearInterval(interval);
-    }, [currentPiece, position, board]);
-
-
     useEffect(() => {
         function handleKeyDown(e) {
             if (!currentPiece) return;
@@ -107,15 +92,16 @@ export default function Grid({ onScore }) {
         return false;
     };
 
-    const lockPiece = () => {
+    const lockPiece = (posOverride) => {
+        const posToUse = posOverride || position;
         const newBoard = board.map(row => [...row]);
         const matrix = currentPiece.shape[currentPiece.rotation];
 
         for (let r = 0; r < matrix.length; r++) {
             for (let c = 0; c < matrix[r].length; c++) {
                 if (matrix[r][c]) {
-                    const nr = position.row + r;
-                    const nc = position.col + c;
+                    const nr = posToUse.row + r;
+                    const nc = posToUse.col + c;
                     if (nr >= 0 && nr < ROWS && nc >= 0 && nc < COLS) {
                         newBoard[nr][nc] = 1;
                     }
@@ -133,6 +119,7 @@ export default function Grid({ onScore }) {
         if (rows === 4) onScore(s => s + 1000);
 
         spawnNextPiece();
+
     };
 
 
@@ -170,11 +157,47 @@ export default function Grid({ onScore }) {
         setPosition(startPos);
     };
 
+    useEffect(() => {
+        if (!currentPiece) return;
+
+        const interval = setInterval(() => {
+            const nextPos = { row: position.row + 1, col: position.col };
+
+            if (checkCollision(currentPiece, nextPos, board)) {
+                lockPiece();
+                return;
+            }
+
+            setPosition(nextPos);
+        }, 1000);
+
+        return () => clearInterval(interval);
+    }, [currentPiece, position, board]);
+
+
 
     const getRenderedBoard = () => {
         const temp = board.map(row => [...row]);
+
         if (!currentPiece) return temp;
+
         const matrix = currentPiece.shape[currentPiece.rotation];
+
+        const ghostPos = getGhostPosition();
+        for (let r = 0; r < matrix.length; r++) {
+            for (let c = 0; c < matrix[r].length; c++) {
+                if (matrix[r][c]) {
+                    const gr = ghostPos.row + r;
+                    const gc = ghostPos.col + c;
+                    if (gr >= 0 && gr < ROWS && gc >= 0 && gc < COLS) {
+                        if (temp[gr][gc] === 0) {
+                            temp[gr][gc] = 3;
+                        }
+                    }
+                }
+            }
+        }
+
         for (let r = 0; r < matrix.length; r++) {
             for (let c = 0; c < matrix[r].length; c++) {
                 if (matrix[r][c]) {
@@ -186,14 +209,28 @@ export default function Grid({ onScore }) {
                 }
             }
         }
+
         return temp;
     };
 
-    const renderedBoard = getRenderedBoard();
 
-    function rotateMatrix(matrix) {
-        return matrix[0].map((_, i) => matrix.map(row => row[i]).reverse());
+    function getGhostPosition() {
+        if (!currentPiece) return position;
+
+        let ghostRow = position.row;
+
+        while (true) {
+            const nextPos = { row: ghostRow + 1, col: position.col };
+            if (checkCollision(currentPiece, nextPos, board)) break;
+            ghostRow++;
+        }
+
+        return { row: ghostRow, col: position.col };
     }
+
+
+
+    const renderedBoard = getRenderedBoard();
 
     function rotatePiece(piece) {
         return {
@@ -205,20 +242,20 @@ export default function Grid({ onScore }) {
     function hardDrop() {
         if (!currentPiece) return;
 
-        let newRow = position.row;
+        let dropRow = position.row;
 
         while (true) {
-            const testPos = { row: newRow + 1, col: position.col };
-
-            // test the REAL piece shape
-            if (checkCollision(currentPiece, testPos, board)) break;
-
-            newRow++;
+            const nextPos = { row: dropRow + 1, col: position.col };
+            if (checkCollision(currentPiece, nextPos, board)) break;
+            dropRow++;
         }
 
-        setPosition({ row: newRow, col: position.col });
-        lockPiece();
+        setPosition({ row: dropRow, col: position.col });
+
+        lockPiece({ row: dropRow, col: position.col });
     }
+
+
 
     return (
         <div className="egrid">
@@ -228,7 +265,12 @@ export default function Grid({ onScore }) {
                         key={`${rowIndex}-${colIndex}`}
                         className="ebox"
                         style={{
-                            backgroundColor: cell === 0 ? "#61616c" : cell === 1 ? "#ff77b0" : "#d76488"
+                            backgroundColor:
+                                cell === 0 ? "#61616c" :
+                                    cell === 1 ? "#ff77b0" :
+                                        cell === 2 ? "#d76488" :
+                                            "rgba(255, 255, 255, 0.3)"  // ghost piece
+
                         }}
                     ></div>
                 ))
