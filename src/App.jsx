@@ -42,6 +42,43 @@ export default function App() {
                 <Upcoming nextPiece={nextPiece} />
               </div>
             </div>
+
+            <div className="side-buttons">
+              <button
+                onClick={() => document.dispatchEvent(new Event("togglePause"))}
+                style={{
+                  padding: "10px 16px",
+                  background: "#ff77b0",
+                  border: "none",
+                  borderRadius: 8,
+                  cursor: "pointer",
+                  fontWeight: 600,
+                  width: "120px",
+                  marginTop: "20px",
+                  marginRight: '20px'
+                }}
+              >
+                Pause
+              </button>
+
+              <button
+                onClick={() => document.dispatchEvent(new Event("resetGame"))}
+                style={{
+                  padding: "10px 16px",
+                  background: "#d76488",
+                  border: "none",
+                  borderRadius: 8,
+                  cursor: "pointer",
+                  fontWeight: 600,
+                  width: "120px",
+                  marginTop: "12px"
+                }}
+              >
+                Restart
+              </button>
+            </div>
+
+
           </div>
 
           <div>

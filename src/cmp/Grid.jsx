@@ -286,6 +286,26 @@ export default function Grid({ onScore, onNextPiece }) {
         setPosition({ row: 0, col: colStart });
     }
 
+    // === LISTEN FOR PAUSE & RESET EVENTS FROM APP ===
+    useEffect(() => {
+        const handlePause = () => {
+            setIsPaused(prev => !prev); // toggle pause/resume
+        };
+
+        const handleReset = () => {
+            resetGame(); // restart game
+        };
+
+        document.addEventListener("togglePause", handlePause);
+        document.addEventListener("resetGame", handleReset);
+
+        return () => {
+            document.removeEventListener("togglePause", handlePause);
+            document.removeEventListener("resetGame", handleReset);
+        };
+    }, []);
+
+
     // ---------------------------
     // UI
     // ---------------------------
