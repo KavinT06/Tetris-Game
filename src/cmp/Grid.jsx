@@ -11,11 +11,15 @@ export default function Grid({ onScore, onNextPiece }) {
     const [currentPiece, setCurrentPiece] = useState(null);
     const [position, setPosition] = useState({ row: 0, col: 3 });
     const [isGameOver, setIsGameOver] = useState(false);
+    const [isPaused, setIsPaused] = useState(false);
+    const [score, setScore] = useState(0);
 
     const createEmptyBoard = () =>
         Array.from({ length: ROWS }, () => Array(COLS).fill(0));
 
+    // ---------------------------
     // KEYBOARD CONTROLS
+    // ---------------------------
     useEffect(() => {
         function handleKeyDown(e) {
             if (isGameOver) return;
@@ -23,34 +27,33 @@ export default function Grid({ onScore, onNextPiece }) {
 
             if (e.key === "ArrowLeft") {
                 const nextPos = { row: position.row, col: position.col - 1 };
-                if (!checkCollision(currentPiece, nextPos, board)) {
-                    setPosition(nextPos);
-                }
+                if (!checkCollision(currentPiece, nextPos, board)) setPosition(nextPos);
             }
 
             if (e.key === "ArrowRight") {
                 const nextPos = { row: position.row, col: position.col + 1 };
-                if (!checkCollision(currentPiece, nextPos, board)) {
-                    setPosition(nextPos);
-                }
+                if (!checkCollision(currentPiece, nextPos, board)) setPosition(nextPos);
             }
 
             if (e.key === "ArrowDown") {
                 const nextPos = { row: position.row + 1, col: position.col };
-                if (!checkCollision(currentPiece, nextPos, board)) {
-                    setPosition(nextPos);
-                }
+                if (!checkCollision(currentPiece, nextPos, board)) setPosition(nextPos);
             }
 
             if (e.key === "ArrowUp") {
                 const rotated = rotatePiece(currentPiece);
                 const nextPos = { row: position.row, col: position.col };
-                if (!checkCollision(rotated, nextPos, board)) {
-                    setCurrentPiece(rotated);
-                }
+                if (!checkCollision(rotated, nextPos, board)) setCurrentPiece(rotated);
             }
 
+            // Pause/Resume
             if (e.key === " ") {
+                setIsPaused(prev => !prev);
+                return;
+            }
+
+            // Hard drop
+            if (e.key === "0") {
                 e.preventDefault();
                 hardDrop();
             }
@@ -60,7 +63,9 @@ export default function Grid({ onScore, onNextPiece }) {
         return () => window.removeEventListener("keydown", handleKeyDown);
     }, [currentPiece, position, board, isGameOver]);
 
-    // INITIAL PIECE
+    // ---------------------------
+    // INITIAL START PIECE
+    // ---------------------------
     useEffect(() => {
         const p = randomTetromino();
         const matrix = p.shape[p.rotation];
@@ -69,9 +74,9 @@ export default function Grid({ onScore, onNextPiece }) {
         setPosition({ row: 0, col: colStart });
     }, []);
 
-    const [score, setScore] = useState(0);
-
+    // ---------------------------
     // COLLISION CHECKER
+    // ---------------------------
     const checkCollision = (piece, pos, brd) => {
         const matrix = piece.shape[piece.rotation];
 
@@ -89,7 +94,9 @@ export default function Grid({ onScore, onNextPiece }) {
         return false;
     };
 
-    // CLEAR FILLED ROWS
+    // ---------------------------
+    // CLEAR ROWS
+    // ---------------------------
     const clearRows = newBoard => {
         const fullRows = [];
         for (let r = 0; r < ROWS; r++) {
@@ -106,12 +113,12 @@ export default function Grid({ onScore, onNextPiece }) {
         return { board: [...empty, ...updated], rows: fullRows.length };
     };
 
+    // ---------------------------
+    // SPAWN NEXT PIECE
+    // ---------------------------
     const spawnNextPiece = () => {
         const nextPiece = randomTetromino();
-
-        if (onNextPiece) {
-            onNextPiece(nextPiece);
-        }
+        onNextPiece?.(nextPiece);
 
         const matrix = nextPiece.shape[nextPiece.rotation];
         const colStart = Math.floor((COLS - matrix[0].length) / 2);
@@ -126,22 +133,20 @@ export default function Grid({ onScore, onNextPiece }) {
         setPosition(startPos);
     };
 
-
-
+    // ---------------------------
+    // LOCK PIECE
+    // ---------------------------
     const lockPiece = (posOverride) => {
         const posToUse = posOverride || position;
 
-        // Game Over if piece locks at top
         if (posToUse.row <= 0) {
             setIsGameOver(true);
             return;
         }
 
-        // Copy board
         const newBoard = board.map(row => [...row]);
         const matrix = currentPiece.shape[currentPiece.rotation];
 
-        // Lock current piece into board
         for (let r = 0; r < matrix.length; r++) {
             for (let c = 0; c < matrix[r].length; c++) {
                 if (matrix[r][c]) {
@@ -154,33 +159,27 @@ export default function Grid({ onScore, onNextPiece }) {
             }
         }
 
-        // Clear full rows
         const { board: clearedBoard, rows } = clearRows(newBoard);
         setBoard(clearedBoard);
 
-        // Update score correctly
         if (rows > 0) {
             setScore(prev => {
-                let points = 0;
-                if (rows === 1) points = 100;
-                if (rows === 2) points = 300;
-                if (rows === 3) points = 600;
-                if (rows === 4) points = 1000;
-
+                let points = [0, 100, 300, 600, 1000][rows] || 0;
                 const newScore = prev + points;
-                onScore?.(newScore); // send actual score to App.jsx
+                onScore?.(newScore);
                 return newScore;
             });
         }
 
-        // Spawn next piece
         spawnNextPiece();
     };
 
-
-    // AUTO FALLING
+    // ---------------------------
+    // AUTO FALL
+    // ---------------------------
     useEffect(() => {
         if (!currentPiece || isGameOver) return;
+        if (isPaused) return;
 
         const interval = setInterval(() => {
             const nextPos = { row: position.row + 1, col: position.col };
@@ -194,12 +193,12 @@ export default function Grid({ onScore, onNextPiece }) {
         }, 1000);
 
         return () => clearInterval(interval);
-    }, [currentPiece, position, board, isGameOver]);
+    }, [currentPiece, position, board, isGameOver, isPaused]);
 
+    // ---------------------------
+    // HARD DROP
+    // ---------------------------
     function hardDrop() {
-        if (isGameOver) return;
-        if (!currentPiece) return;
-
         let dropRow = position.row;
 
         while (true) {
@@ -212,7 +211,9 @@ export default function Grid({ onScore, onNextPiece }) {
         lockPiece({ row: dropRow, col: position.col });
     }
 
+    // ---------------------------
     // GHOST PIECE
+    // ---------------------------
     const getGhostPosition = () => {
         let ghostRow = position.row;
         while (true) {
@@ -223,7 +224,9 @@ export default function Grid({ onScore, onNextPiece }) {
         return { row: ghostRow, col: position.col };
     };
 
+    // ---------------------------
     // RENDER BOARD
+    // ---------------------------
     const getRenderedBoard = () => {
         const temp = board.map(row => [...row]);
         if (!currentPiece) return temp;
@@ -231,7 +234,7 @@ export default function Grid({ onScore, onNextPiece }) {
         const matrix = currentPiece.shape[currentPiece.rotation];
         const ghostPos = getGhostPosition();
 
-        // ghost cells
+        // ghost = 3
         for (let r = 0; r < matrix.length; r++) {
             for (let c = 0; c < matrix[r].length; c++) {
                 if (matrix[r][c]) {
@@ -242,7 +245,7 @@ export default function Grid({ onScore, onNextPiece }) {
             }
         }
 
-        // active piece
+        // active = 2
         for (let r = 0; r < matrix.length; r++) {
             for (let c = 0; c < matrix[r].length; c++) {
                 if (matrix[r][c]) {
@@ -258,13 +261,17 @@ export default function Grid({ onScore, onNextPiece }) {
 
     const renderedBoard = getRenderedBoard();
 
+    // ---------------------------
     // ROTATION
+    // ---------------------------
     const rotatePiece = piece => ({
         ...piece,
         rotation: (piece.rotation + 1) % piece.shape.length
     });
 
+    // ---------------------------
     // RESET GAME
+    // ---------------------------
     function resetGame() {
         setBoard(createEmptyBoard());
         setScore(0);
@@ -279,6 +286,9 @@ export default function Grid({ onScore, onNextPiece }) {
         setPosition({ row: 0, col: colStart });
     }
 
+    // ---------------------------
+    // UI
+    // ---------------------------
     return (
         <div style={{ position: 'relative' }}>
             <div className="egrid" aria-hidden={isGameOver}>
@@ -292,7 +302,7 @@ export default function Grid({ onScore, onNextPiece }) {
                                     cell === 0 ? "#61616c" :
                                         cell === 1 ? "#ff77b0" :
                                             cell === 2 ? "#d76488" :
-                                                "rgba(255, 255, 255, 0.3)"
+                                                "rgba(255,255,255,0.3)"
                             }}
                         ></div>
                     ))
@@ -323,6 +333,26 @@ export default function Grid({ onScore, onNextPiece }) {
                     </button>
 
                     <p>Score: {score}</p>
+                </div>
+            )}
+
+            {isPaused && (
+                <div style={{
+                    position: 'absolute',
+                    height: '90vh',
+                    inset: 0,
+                    background: "rgba(0,0,0,0.65)",
+                    display: "flex",
+                    flexDirection: "column",
+                    justifyContent: "center",
+                    alignItems: "center",
+                    color: "white",
+                    gap: 16,
+                    fontSize: 24,
+                    fontWeight: 700,
+                }}>
+                    Paused
+                    <p>Press "SpaceBar" to resume</p>
                 </div>
             )}
         </div>
