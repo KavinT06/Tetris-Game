@@ -9,6 +9,7 @@ export default function Grid({ onScore, onNextPiece }) {
         Array.from({ length: ROWS }, () => Array(COLS).fill(0))
     );
     const [currentPiece, setCurrentPiece] = useState(null);
+    const [nextPieceInQueue, setNextPieceInQueue] = useState(null);
     const [position, setPosition] = useState({ row: 0, col: 3 });
     const [isGameOver, setIsGameOver] = useState(false);
     const [isPaused, setIsPaused] = useState(false);
@@ -72,6 +73,11 @@ export default function Grid({ onScore, onNextPiece }) {
         const colStart = Math.floor((COLS - matrix[0].length) / 2);
         setCurrentPiece(p);
         setPosition({ row: 0, col: colStart });
+
+        // Generate the NEXT piece for preview
+        const nextPiece = randomTetromino();
+        setNextPieceInQueue(nextPiece);
+        onNextPiece?.(nextPiece);
     }, []);
 
     // ---------------------------
@@ -117,19 +123,24 @@ export default function Grid({ onScore, onNextPiece }) {
     // SPAWN NEXT PIECE
     // ---------------------------
     const spawnNextPiece = () => {
-        const nextPiece = randomTetromino();
-        onNextPiece?.(nextPiece);
+        // Use the pre-generated next piece from the queue
+        const pieceToSpawn = nextPieceInQueue;
 
-        const matrix = nextPiece.shape[nextPiece.rotation];
+        // Generate a NEW next piece for the preview
+        const newNextPiece = randomTetromino();
+        setNextPieceInQueue(newNextPiece);
+        onNextPiece?.(newNextPiece);
+
+        const matrix = pieceToSpawn.shape[pieceToSpawn.rotation];
         const colStart = Math.floor((COLS - matrix[0].length) / 2);
         const startPos = { row: 0, col: colStart };
 
-        if (checkCollision(nextPiece, startPos, board)) {
+        if (checkCollision(pieceToSpawn, startPos, board)) {
             setIsGameOver(true);
             return;
         }
 
-        setCurrentPiece(nextPiece);
+        setCurrentPiece(pieceToSpawn);
         setPosition(startPos);
     };
 
@@ -284,6 +295,11 @@ export default function Grid({ onScore, onNextPiece }) {
 
         setCurrentPiece(p);
         setPosition({ row: 0, col: colStart });
+
+        // Generate next piece for preview
+        const nextPiece = randomTetromino();
+        setNextPieceInQueue(nextPiece);
+        onNextPiece?.(nextPiece);
     }
 
     // === LISTEN FOR PAUSE & RESET EVENTS FROM APP ===
